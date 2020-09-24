@@ -10,7 +10,7 @@ apk add apache2 apache2-proxy php-apache2 fuse unionfs-fuse curlftpfs sudo
 sed -i 's/DEFAULT menu.c32/DEFAULT virt/g' /boot/extlinux.conf # boot directly into alpine
 
 # install php packages
-apk add php-json php-openssl php-session php-pdo php-pdo_sqlite
+apk add php-json php-openssl php-session php-pdo php-pdo_sqlite php-simplexml php-xml
 wget -O/tmp/vendor.tar https://github.com/FlashpointProject/svcomposer/releases/download/18c0ebd/vendor.tar
 tar -xvf /tmp/vendor.tar -C /var/www/localhost --exclude='vendor/silexlabs/amfphp/doc'
 
