@@ -6,7 +6,7 @@ echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositor
 echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
 apk update
 apk upgrade musl # required to compile fuse-zip
-apk add apache2 apache2-proxy php-apache2 fuse unionfs-fuse curlftpfs sudo
+apk add apache2 apache2-proxy php-apache2 fuse unionfs-fuse inotify-tools jq
 sed -i 's/DEFAULT menu.c32/DEFAULT virt/g' /boot/extlinux.conf # boot directly into alpine
 
 # install php packages
@@ -25,6 +25,12 @@ make release && make install
 git clone https://github.com/XXLuigiMario/fuzzyfs.git /tmp/fuzzyfs
 cd /tmp/fuzzyfs
 make && make install
+
+# install demotetoregularfilefs
+git clone https://github.com/vi/simplecowfs /tmp/demotefs
+cd /tmp/demotefs
+gcc -Wall demotetoregularfilefs.c $(pkg-config --cflags --libs fuse) -lulockmgr -o demotetoregularfilefs
+install demotetoregularfilefs /usr/local/bin
 
 # setup htdocs
 mkdir /root/base
@@ -49,4 +55,48 @@ sed -i '/INCLUDES.*shtml$/a\    AddType application/x-httpd-php .phtml' /etc/apa
 echo 'SetEnv force-response-1.0' >>/etc/apache2/httpd.conf # required for certain Shockwave games, thanks Tomy
 echo 'SetEnvIf Remote_Addr "::1" dontlog' >>/etc/apache2/httpd.conf # disable logging of Apache's dummy connections
 echo 'ProxyPreserveHost On' >>/etc/apache2/httpd.conf # keep "Host" header when proxying requests to legacy server
+
+# setup gamezip service
+cat << 'EOF' >/root/gamezip
+#!/bin/sh
+cd /root
+mkdir m
+modprobe fuse
+unionfs /root/base /var/www/localhost/htdocs -o allow_other
+demotetoregularfilefs m
+
+mount() {
+    file=$1
+    mkdir "/tmp/$file"
+    fuse-zip -r "m/dev/$file" "/tmp/$file" -o allow_other
+    # hack for "Premature end-of-file encountered"
+    while [ $? -ne 0 ]; do
+        sleep 1
+        fuse-zip -r "m/dev/$file" "/tmp/$file" -o allow_other
+    done
+    if [ ! -f "/tmp/$file/content.json" ]; then
+        return
+    fi
+    uuid=$(jq -r ".uniqueId" <"/tmp/$file/content.json")
+    mkdir "/tmp/$uuid"
+    fuzzyfs "/tmp/$file" "/tmp/$uuid" -o allow_other
+    umount -l /var/www/localhost/htdocs
+    union="/tmp/$uuid/content:$(cat /tmp/union)"
+    echo $union >/tmp/union
+    unionfs "/root/base:$union" /var/www/localhost/htdocs -o allow_other
+}
+
+inotifywait -m /dev -e create |
+    while read root event file; do
+        mount $file &
+    done
+EOF
+cat << 'EOF' >/etc/init.d/gamezip
+#!/sbin/openrc-run
+command="/root/gamezip"
+command_background=true
+pidfile="/run/${RC_SVNAME}.pid"
+EOF
+chmod +x /root/gamezip /etc/init.d/gamezip
+rc-update add gamezip
 echo Done!
