@@ -6,7 +6,7 @@ echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositor
 echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
 apk update
 apk upgrade musl # required to compile fuse-zip
-apk add apache2 php-apache2 fuse unionfs-fuse curlftpfs sudo
+apk add apache2 apache2-proxy php-apache2 fuse unionfs-fuse curlftpfs sudo
 sed -i 's/DEFAULT menu.c32/DEFAULT virt/g' /boot/extlinux.conf # boot directly into alpine
 
 # install php packages
@@ -27,7 +27,7 @@ cd /tmp/fuzzyfs
 make && make install
 
 # setup htdocs
-mkdir /root/base /mnt/games /mnt/htdocs
+mkdir /root/base
 git clone --recursive https://github.com/FlashpointProject/svroot_ultimate.git /tmp/svroot
 cd /tmp/svroot
 find . -type f -not -path '*/.git*' -exec cp --parents {} /root/base \;
@@ -48,4 +48,5 @@ sed -i '/INCLUDES.*shtml$/a\    AddType x-world/x-vrt .vrt' /etc/apache2/httpd.c
 sed -i '/INCLUDES.*shtml$/a\    AddType application/x-httpd-php .phtml' /etc/apache2/httpd.conf
 echo 'SetEnv force-response-1.0' >>/etc/apache2/httpd.conf # required for certain Shockwave games, thanks Tomy
 echo 'SetEnvIf Remote_Addr "::1" dontlog' >>/etc/apache2/httpd.conf # disable logging of Apache's dummy connections
+echo 'ProxyPreserveHost On' >>/etc/apache2/httpd.conf # keep "Host" header when proxying requests to legacy server
 echo Done!
