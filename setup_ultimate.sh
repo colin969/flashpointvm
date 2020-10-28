@@ -56,6 +56,10 @@ echo 'SetEnv force-response-1.0' >>/etc/apache2/httpd.conf # required for certai
 echo 'SetEnvIf Remote_Addr "::1" dontlog' >>/etc/apache2/httpd.conf # disable logging of Apache's dummy connections
 echo 'ProxyPreserveHost On' >>/etc/apache2/httpd.conf # keep "Host" header when proxying requests to legacy server
 
+# hack: fix mime types for requests from legacy server
+sed -i 's/exe dll com bat msi/exe dll bat msi/g' /etc/apache2/mime.types
+sed -i 's:application/vnd.lotus-organizer:# application/vnd.lotus-organizer:g' /etc/apache2/mime.types
+
 # setup gamezip service
 cat << 'EOF' >/root/gamezip
 #!/bin/sh
