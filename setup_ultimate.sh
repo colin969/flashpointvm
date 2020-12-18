@@ -9,6 +9,9 @@ apk upgrade musl # required to compile fuse-zip
 apk add apache2 apache2-proxy php-apache2 fuse avfs unionfs-fuse sudo
 sed -i 's/DEFAULT menu.c32/DEFAULT virt/g' /boot/extlinux.conf # boot directly into alpine
 
+# install dev dependencies
+apk add fuse-dev build-base git
+
 # install php packages
 apk add php-json php-openssl php-session php-pdo php-pdo_sqlite php-simplexml php-xml
 wget -O/tmp/vendor.tar https://github.com/FlashpointProject/svcomposer/releases/download/18c0ebd/vendor.tar
