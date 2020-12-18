@@ -27,7 +27,7 @@ cd /tmp/fuzzyfs
 make && make install
 
 # install demotetoregularfilefs
-git clone https://github.com/vi/simplecowfs /tmp/demotefs
+git clone https://github.com/XXLuigiMario/simplecowfs /tmp/demotefs
 cd /tmp/demotefs
 gcc -Wall demotetoregularfilefs.c $(pkg-config --cflags --libs fuse) -lulockmgr -o demotetoregularfilefs
 install demotetoregularfilefs /usr/local/bin
