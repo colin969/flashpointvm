@@ -6,7 +6,7 @@ echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositor
 echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
 apk update
 apk upgrade musl # required to compile fuse-zip
-apk add apache2 apache2-proxy php-apache2 fuse unionfs-fuse sudo
+apk add apache2 apache2-proxy php-apache2 fuse avfs unionfs-fuse sudo
 sed -i 's/DEFAULT menu.c32/DEFAULT virt/g' /boot/extlinux.conf # boot directly into alpine
 
 # install php packages
@@ -14,23 +14,10 @@ apk add php-json php-openssl php-session php-pdo php-pdo_sqlite php-simplexml ph
 wget -O/tmp/vendor.tar https://github.com/FlashpointProject/svcomposer/releases/download/18c0ebd/vendor.tar
 tar -xvf /tmp/vendor.tar -C /var/www/localhost --exclude='vendor/silexlabs/amfphp/doc'
 
-# install fuse-zip
-apk add fuse-dev build-base libzip-dev git
-git clone https://bitbucket.org/agalanin/fuse-zip.git /tmp/fuse-zip
-cd /tmp/fuse-zip
-sed -i 's/-Werror//g' Makefile
-make release && make install
-
 # install fuzzyfs
 git clone https://github.com/XXLuigiMario/fuzzyfs.git /tmp/fuzzyfs
 cd /tmp/fuzzyfs
 make && make install
-
-# install demotetoregularfilefs
-git clone https://github.com/XXLuigiMario/simplecowfs /tmp/demotefs
-cd /tmp/demotefs
-gcc -Wall demotetoregularfilefs.c $(pkg-config --cflags --libs fuse) -lulockmgr -o demotetoregularfilefs
-install demotetoregularfilefs /usr/local/bin
 
 # setup htdocs
 mkdir /root/base
@@ -65,7 +52,7 @@ cat << 'EOF' >/root/gamezip
 #!/bin/sh
 modprobe fuse
 unionfs /root/base /var/www/localhost/htdocs -o allow_other
-demotetoregularfilefs /mnt
+mountavfs
 EOF
 cat << 'EOF' >/etc/init.d/gamezip
 #!/sbin/openrc-run
