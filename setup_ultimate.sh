@@ -55,7 +55,8 @@ cat << 'EOF' >/root/gamezip
 #!/bin/sh
 modprobe fuse
 unionfs /root/base /var/www/localhost/htdocs -o allow_other
-mountavfs
+mkdir /root/.avfs
+avfsd /root/.avfs -o allow_other,umask=002
 EOF
 cat << 'EOF' >/etc/init.d/gamezip
 #!/sbin/openrc-run
