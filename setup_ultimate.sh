@@ -5,7 +5,6 @@ echo 'https://dl-cdn.alpinelinux.org/alpine/edge/main' >/etc/apk/repositories
 echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositories
 echo 'https://dl-cdn.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
 apk update
-apk upgrade musl # required to compile fuse-zip
 apk add apache2 apache2-proxy php-apache2 fuse avfs unionfs-fuse sudo
 sed -i 's/DEFAULT menu.c32/DEFAULT virt/g' /boot/extlinux.conf # boot directly into alpine
 
