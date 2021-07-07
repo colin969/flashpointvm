@@ -23,7 +23,7 @@ make && make install
 
 # setup htdocs
 mkdir /root/base
-git clone --recursive https://github.com/FlashpointProject/svroot_ultimate.git /tmp/svroot
+git clone https://github.com/FlashpointProject/svroot.git /tmp/svroot
 cd /tmp/svroot
 find . -type f -not -path '*/.git*' -exec cp --parents {} /root/base \;
 chmod -R 755 /root/base
