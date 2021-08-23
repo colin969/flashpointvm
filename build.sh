@@ -8,7 +8,7 @@ if ! command -v qemu-img >/dev/null; then
 	echo "Please ensure qemu-utils is installed"
 	exit 1
 fi
-tmp=$(mktemp -u alpine.XXXXXX)
+tmp=$(mktemp -u -t alpine.XXXXXX)
 curl "$ALPINE_MAKEVM" | sh /dev/stdin -f qcow2 -c "$tmp" setup.sh \
 && echo Shrinking image, please wait \
 && qemu-img convert -O qcow2 "$tmp" "$1" \
