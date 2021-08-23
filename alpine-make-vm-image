@@ -105,10 +105,9 @@ alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOC
 : ${APK:="apk"}
 : ${APK_OPTS:="--no-progress"}
 
-
 # For compatibility with systems that does not have "realpath" command.
 if ! command -v realpath >/dev/null; then
-	alias realpath='readlink -f'
+	alias realpath='readlink'
 fi
 
 die() {
